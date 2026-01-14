@@ -1,5 +1,5 @@
-using OnlineBookstore.Data;
 using Microsoft.EntityFrameworkCore;
+using OnlineBookstore.Domain.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<OnlineBookstoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("OnlineBookstoreContext")));
 
+builder.Services.AddQuickGridEntityFrameworkAdapter();
+
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -17,6 +25,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+    app.UseMigrationsEndPoint();
 }
 
 app.UseHttpsRedirection();
@@ -27,5 +36,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapRazorComponents<App>();
 
 app.Run();

@@ -1,0 +1,66 @@
+﻿@page "/books/details"
+@using Microsoft.EntityFrameworkCore
+@using OnlineBookstore.Domain.Entities
+@inject IDbContextFactory<OnlineBookstore.Domain.Data.OnlineBookstoreContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Book</h2>
+    <hr />
+    @if (book is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Title</dt>
+            <dd class="col-sm-10">@book.Title</dd>
+            <dt class="col-sm-2">Author</dt>
+            <dd class="col-sm-10">@book.Author</dd>
+            <dt class="col-sm-2">ISBN</dt>
+            <dd class="col-sm-10">@book.ISBN</dd>
+            <dt class="col-sm-2">PricePhysical</dt>
+            <dd class="col-sm-10">@book.PricePhysical</dd>
+            <dt class="col-sm-2">PriceSoftcopy</dt>
+            <dd class="col-sm-10">@book.PriceSoftcopy</dd>
+            <dt class="col-sm-2">StockQuantity</dt>
+            <dd class="col-sm-10">@book.StockQuantity</dd>
+            <dt class="col-sm-2">GenreId</dt>
+            <dd class="col-sm-10">@book.GenreId</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@book.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@book.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@book.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@book.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/books/edit?id={book.Id}")">Edit</a> |
+            <a href="@($"/books")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Book? book;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        book = await context.Books.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (book is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

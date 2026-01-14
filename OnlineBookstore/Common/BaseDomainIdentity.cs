@@ -1,6 +1,6 @@
-﻿namespace OnlineBookstore.Domain
+﻿namespace OnlineBookstore.Common
 {
-    public abstract class BaseDomainModel
+    public abstract class BaseDomainEntity
     {
         public int Id { get; set; }
         public DateTime DateCreated { get; set; }
@@ -9,4 +9,4 @@
         public string? UpdatedBy { get; set; }
     }
 }
-
+    
