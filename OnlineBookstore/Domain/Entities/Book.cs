@@ -5,7 +5,7 @@ namespace OnlineBookstore.Domain.Entities
 {
     public class Book : BaseDomainEntity
     {
-        public class Book : BaseDomainEntity
+        public class book : BaseDomainEntity
         {
             [Required]
             public string? Title { get; set; }
