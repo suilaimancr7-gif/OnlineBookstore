@@ -9,10 +9,11 @@
 
 <PageTitle>Home</PageTitle>
 
-<AuthorizeView>
+@* Renaming the context to 'authContext' to avoid RZ9999 clash with EditForm *@
+<AuthorizeView Context="authContext">
     <Authorized>
         <div class="container text-center mt-5">
-            <h1>Welcome back, @context.User.Identity?.Name!</h1>
+            <h1>Welcome back, @authContext.User.Identity?.Name!</h1>
             <p class="lead">You are successfully logged in.</p>
             <div class="mt-4">
                 <a href="books" class="btn btn-primary btn-lg me-2">Browse Books</a>

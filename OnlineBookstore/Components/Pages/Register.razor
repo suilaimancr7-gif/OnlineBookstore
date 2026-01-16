@@ -1,0 +1,75 @@
+﻿@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using OnlineBookstore.Domain
+@inject UserManager<OnlineBookstoreUser> UserManager
+@inject SignInManager<OnlineBookstoreUser> SignInManager
+@inject NavigationManager NavigationManager
+
+<PageTitle>Sign Up</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 p-4 border rounded bg-white shadow-sm">
+            <h3 class="mb-3 text-center">Create Account</h3>
+            <EditForm Model="RegisterInput" OnValidSubmit="RegisterUser" FormName="registerForm">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <InputText @bind-Value="RegisterInput.FirstName" class="form-control" />
+                    <ValidationMessage For="() => RegisterInput.FirstName" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <InputText @bind-Value="RegisterInput.Email" class="form-control" />
+                    <ValidationMessage For="() => RegisterInput.Email" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText type="password" @bind-Value="RegisterInput.Password" class="form-control" />
+                    <ValidationMessage For="() => RegisterInput.Password" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 py-2">Sign Up</button>
+            </EditForm>
+
+            <div class="mt-3 text-center">
+                <p>Already have an account? <a href="/">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private RegisterModel RegisterInput { get; set; } = new();
+
+    private async Task RegisterUser()
+    {
+        var user = new OnlineBookstoreUser
+        {
+            UserName = RegisterInput.Email,
+            Email = RegisterInput.Email,
+            FirstName = RegisterInput.FirstName
+        };
+
+        var result = await UserManager.CreateAsync(user, RegisterInput.Password);
+
+        if (result.Succeeded)
+        {
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            // Launches book pages immediately after successful registration
+            NavigationManager.NavigateTo("/books");
+        }
+    }
+
+    public class RegisterModel
+    {
+        [Required] public string FirstName { get; set; } = "";
+        [Required, EmailAddress] public string Email { get; set; } = "";
+        [Required, MinLength(6)] public string Password { get; set; } = "";
+    }
+}
