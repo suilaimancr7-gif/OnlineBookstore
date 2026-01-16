@@ -5,21 +5,19 @@ namespace OnlineBookstore.Domain.Entities
 {
     public class Book : BaseDomainEntity
     {
-        public class book : BaseDomainEntity
-        {
-            [Required]
-            public string? Title { get; set; }
-            public string? ISBN { get; set; }
-            public string? Description { get; set; } // For the book details page
+        [Required]
+        public string? Title { get; set; }
+        public string? ISBN { get; set; }
+        public string? Description { get; set; }
+        public string? ImageLink { get; set; } // Required for your picture feature
 
-            public double PricePhysical { get; set; }
-            public double PriceSoftcopy { get; set; }
+        public double PricePhysical { get; set; }
+        public double PriceSoftcopy { get; set; }
 
-            public int? AuthorId { get; set; }
-            public virtual Author? Author { get; set; }
+        public int? AuthorId { get; set; }
+        public virtual Author? Author { get; set; }
 
-            public int? GenreId { get; set; }
-            public virtual Genre? Genre { get; set; }
-        }
+        public int? GenreId { get; set; }
+        public virtual Genre? Genre { get; set; }
     }
 }

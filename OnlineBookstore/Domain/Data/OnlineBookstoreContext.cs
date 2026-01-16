@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using OnlineBookstore.Domain.Entities;
+using OnlineBookstore.Domain;
 
 namespace OnlineBookstore.Domain.Data
 {
-    public class OnlineBookstoreContext : DbContext
+    // Inherit from IdentityDbContext to enable login/signup logic
+    public class OnlineBookstoreContext : IdentityDbContext<OnlineBookstoreUser>
     {
         public OnlineBookstoreContext(DbContextOptions<OnlineBookstoreContext> options)
             : base(options)
