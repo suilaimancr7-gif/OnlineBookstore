@@ -46,11 +46,10 @@
 
                                 <div class="col-3 text-center">
                                     @{
-                                        // Dynamic price calculation from the Book entity
                                         double unitPrice = entry.SelectedFormat == "Physical"
                                         ? (entry.Item.Book?.PricePhysical ?? 0)
                                         : (entry.Item.Book?.PriceSoftcopy ?? 0);
-                                        decimal displayPrice = (decimal)unitPrice; // Fixes CS0266
+                                        decimal displayPrice = (decimal)unitPrice;
                                     }
                                     <div class="fw-bold">@displayPrice.ToString("C")</div>
                                     <div class="small text-muted">Qty: @entry.Item.Quantity</div>
@@ -70,20 +69,21 @@
 
             <div class="col-md-4">
                 <div class="card shadow border-0 p-3">
-                    <h4 class="mb-4">Order Summary</h4>
+                    <h4 class="mb-4">Cart Summary</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Total Items:</span>
                         <span>@CartService.GetCount()</span>
                     </div>
                     <hr />
                     <div class="d-flex justify-content-between mb-4">
-                        <span class="h5">Total:</span>
+                        <span class="h5">Total Price:</span>
                         <span class="h5 text-primary fw-bold">@CartService.GetTotal().ToString("C")</span>
                     </div>
 
-                    <button class="btn btn-success btn-lg w-100 fw-bold shadow-sm mb-2">
-                        Proceed to Checkout
-                    </button>
+                    @* Changed from button to navigation link for the Checkout CRUD process *@
+                    <a href="/checkout" class="btn btn-success btn-lg w-100 fw-bold shadow-sm mb-2">
+                        Go to Checkout
+                    </a>
 
                     <button class="btn btn-link text-muted btn-sm w-100" @onclick="CartService.ClearCart">
                         Clear All Items

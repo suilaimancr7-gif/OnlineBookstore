@@ -1,0 +1,32 @@
+﻿@page "/orders/details/{id:int}"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IGenericRepository<Order> OrderRepo
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Order Information: #@id</h5>
+        </div>
+        <div class="card-body">
+            @if (order != null)
+            {
+                <p><strong>Order Timestamp:</strong> @order.OrderDate.ToString("f")</p>
+                <p><strong>Status:</strong> Processing</p>
+            }
+            <hr />
+            <a href="/orders" class="btn btn-outline-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+    private Order? order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        order = await OrderRepo.Get(q => q.Id == id); // Details
+    }
+}

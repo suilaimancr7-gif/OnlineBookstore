@@ -1,0 +1,58 @@
+﻿@page "/orders"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IGenericRepository<Order> OrderRepo
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-4">
+        <h3>Order History</h3>
+    </div>
+
+    <table class="table table-hover border shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.OrderDate.ToShortDateString()</td>
+                    <td class="text-center">
+                        <a href="/orders/details/@order.Id" class="btn btn-info btn-sm">Details</a>
+                        <a href="/orders/edit/@order.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(order.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Order> orders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await OrderRepo.GetAll();
+        orders = response.ToList();
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        // Fixed: Passing 'id' (int) to match repository requirement
+        var orderToDelete = await OrderRepo.Get(q => q.Id == id);
+        if (orderToDelete != null)
+        {
+            await OrderRepo.Delete(id);
+            orders = (await OrderRepo.GetAll()).ToList();
+        }
+    }
+}

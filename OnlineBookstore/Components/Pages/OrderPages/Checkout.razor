@@ -1,0 +1,205 @@
+﻿@page "/checkout"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Services
+@using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject CartService CartService
+@inject IGenericRepository<Order> OrderRepo
+@inject NavigationManager NavManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Secure Checkout</PageTitle>
+
+<div class="container mt-4">
+    @if (!isPaymentSuccessful)
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-dark text-white text-center py-3">
+                        <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Secure Payment Gateway</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">@errorMessage</div>
+                        }
+
+                        <h5 class="mb-3 text-primary">1. Customer Details</h5>
+
+                        @* Address is only required if Physical books are present *@
+                        @if (CartService.CartEntries.Any(e => e.SelectedFormat == "Physical"))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Shipping Address</label>
+                                <textarea @bind="shippingAddress" class="form-control" rows="2" placeholder="Required for physical delivery"></textarea>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" @bind="customerEmail" class="form-control" placeholder="Required for e-books/receipt" />
+                        </div>
+
+                        <hr />
+
+                        <h5 class="mb-3 text-primary">2. Credit Card Information</h5>
+                        <div class="mb-3">
+                            <label class="form-label">16-Digit Card Number</label>
+                            <input type="text" @bind="cardNumber" maxlength="16" class="form-control" placeholder="0000111122223333" />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Date (MM/YY)</label>
+                                <input type="text" @bind="expiryDate" maxlength="5" class="form-control" placeholder="MM/YY" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="password" @bind="cvv" maxlength="3" class="form-control" placeholder="123" />
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn btn-success btn-lg w-100 fw-bold shadow-sm" @onclick="ProcessPayment">
+                                Pay @CartService.GetTotal().ToString("C")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="card shadow border-0 p-5 bg-white">
+                <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
+                <h1 class="text-success fw-bold">Successful Payment!</h1>
+                <p class="lead text-muted">Your transaction has been processed successfully.</p>
+
+                @if (!string.IsNullOrEmpty(generatedTracking))
+                {
+                    <div class="alert alert-primary d-inline-block px-5 mt-3 shadow-sm">
+                        <strong>Physical Tracking Number:</strong> <br />
+                        <span class="h3 fw-bold">@generatedTracking</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(generatedReference))
+                {
+                    <div class="alert alert-success d-inline-block px-5 mt-3 shadow-sm">
+                        <strong>E-book Reference Code:</strong> <br />
+                        <span class="h3 fw-bold">@generatedReference</span>
+                        <p class="mb-0 mt-2 small">Sent to your email within 24 hours.</p>
+                    </div>
+                }
+
+                <div class="mt-4">
+                    <a href="/orders" class="btn btn-primary px-4 me-2">View Order History</a>
+                    <a href="/books" class="btn btn-outline-secondary px-4">Return Home</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string shippingAddress = "";
+    private string customerEmail = "";
+    private string cardNumber = "";
+    private string expiryDate = "";
+    private string cvv = "";
+    private string errorMessage = "";
+    private bool isPaymentSuccessful = false;
+    private string generatedTracking = "";
+    private string generatedReference = "";
+
+    private async Task ProcessPayment()
+    {
+        errorMessage = "";
+
+        // 1. Get User ID to satisfy SQL CustomerId constraint
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            errorMessage = "Please log in to complete your purchase.";
+            return;
+        }
+
+        // 2. Manual Validation
+        if (cardNumber.Length != 16 || !cardNumber.All(char.IsDigit))
+        {
+            errorMessage = "A valid 16-digit card number is required.";
+            return;
+        }
+
+        if (cvv.Length != 3 || string.IsNullOrWhiteSpace(expiryDate))
+        {
+            errorMessage = "Please enter valid payment details (CVV and Expiry).";
+            return;
+        }
+
+        bool hasPhysical = CartService.CartEntries.Any(e => e.SelectedFormat == "Physical");
+        if (hasPhysical && string.IsNullOrWhiteSpace(shippingAddress))
+        {
+            errorMessage = "Shipping address is required for physical book orders.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(customerEmail) || !customerEmail.Contains("@"))
+        {
+            errorMessage = "A valid email address is required.";
+            return;
+        }
+
+        try
+        {
+            // 3. Generate Random 8-Digit Codes
+            Random rnd = new Random();
+            if (hasPhysical)
+            {
+                generatedTracking = rnd.Next(10000000, 99999999).ToString();
+            }
+            if (CartService.CartEntries.Any(e => e.SelectedFormat == "Softcopy"))
+            {
+                generatedReference = rnd.Next(10000000, 99999999).ToString();
+            }
+
+            // 4. Create Order Entity
+            var newOrder = new Order
+            {
+                OrderDate = DateTime.Now,
+                CustomerId = userId,
+                ShippingAddress = hasPhysical ? shippingAddress : "Digital Delivery",
+                CustomerEmail = customerEmail,
+                TrackingNumber = generatedTracking,
+                ReferenceCode = generatedReference
+            };
+
+            foreach (var entry in CartService.CartEntries)
+            {
+                newOrder.OrderItems.Add(new OrderItem
+                {
+                    BookId = entry.Item.BookId,
+                    Quantity = entry.Item.Quantity
+                });
+            }
+
+            // 5. Save to SQL Server
+            await OrderRepo.Insert(newOrder);
+
+            CartService.ClearCart();
+            isPaymentSuccessful = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Order Failed: " + (ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineBookstore.Domain.Data;
 
@@ -11,9 +12,11 @@ using OnlineBookstore.Domain.Data;
 namespace OnlineBookstore.Migrations
 {
     [DbContext(typeof(OnlineBookstoreContext))]
-    partial class OnlineBookstoreContextModelSnapshot : ModelSnapshot
+    [Migration("20260116201918_UpdateOrderCustomerId")]
+    partial class UpdateOrderCustomerId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
