@@ -1,27 +1,20 @@
 ﻿@page "/books/details"
 @using OnlineBookstore.Domain.Entities
 @using OnlineBookstore.Infrastructure.Contracts
+@using OnlineBookstore.Infrastructure.Services
 @using Microsoft.AspNetCore.Authorization
-@rendermode InteractiveServer
 @attribute [Authorize]
+@rendermode InteractiveServer
 @inject IGenericRepository<Book> BookRepo
+@inject CartService CartService
 @inject NavigationManager NavigationManager
 
-<PageTitle>Book Details</PageTitle>
-
-@if (book == null)
-{
-    <div class="text-center mt-5">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p>Loading...</p>
-    </div>
-}
-else
+@if (book != null)
 {
     <div class="container mt-4">
         <div class="row shadow p-4 rounded bg-white">
-            <div class="col-md-4">
-                <img src="@book.ImageLink" class="img-fluid rounded shadow" style="max-height: 400px; object-fit: cover;" onerror="this.src='/favicon.png';" />
+            <div class="col-md-4 text-center">
+                <img src="@book.ImageLink" class="img-fluid rounded shadow" style="max-height: 400px;" />
             </div>
             <div class="col-md-8">
                 <h1>@book.Title</h1>
@@ -29,32 +22,17 @@ else
 
                 <div class="card p-3 my-4 bg-light">
                     <h5>Select Format:</h5>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="bookFormat" id="phys" value="Physical"
-                               @onchange="HandleFormatChange">
-                        <label class="form-check-label" for="phys">
-                            Physical Copy - <strong>@book.PricePhysical.ToString("C")</strong>
-                        </label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="fmt" id="p" value="Physical" @onchange="HandleChange">
+                        <label class="form-check-label" for="p">Physical Copy - @((decimal)book.PricePhysical)</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="bookFormat" id="soft" value="Softcopy"
-                               @onchange="HandleFormatChange">
-                        <label class="form-check-label" for="soft">
-                            Soft Copy (E-Book) - <strong>@book.PriceSoftcopy.ToString("C")</strong>
-                        </label>
+                        <input class="form-check-input" type="radio" name="fmt" id="s" value="Softcopy" @onchange="HandleChange">
+                        <label class="form-check-label" for="s">Soft Copy - @((decimal)book.PriceSoftcopy)</label>
                     </div>
                 </div>
 
-                @if (string.IsNullOrEmpty(SelectedFormat))
-                {
-                    <div class="alert alert-warning py-2 small">
-                        Please select a format to enable the Add to Cart button.
-                    </div>
-                }
-
-                <button class="btn btn-success btn-lg w-100"
-                        disabled="@(string.IsNullOrEmpty(SelectedFormat))"
-                        @onclick="AddToCart">
+                <button class="btn btn-success btn-lg w-100" disabled="@(string.IsNullOrEmpty(SelectedFormat))" @onclick="AddToCart">
                     Add to Cart
                 </button>
             </div>
@@ -67,20 +45,14 @@ else
     private Book? book;
     private string? SelectedFormat;
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Finding by ID using lambda to fix CS1503
-        book = await BookRepo.Get(q => q.Id == Id);
-    }
-
-    private void HandleFormatChange(ChangeEventArgs e)
-    {
-        SelectedFormat = e.Value?.ToString();
-    }
-
+    protected override async Task OnInitializedAsync() => book = await BookRepo.Get(q => q.Id == Id);
+    private void HandleChange(ChangeEventArgs e) => SelectedFormat = e.Value?.ToString();
     private void AddToCart()
     {
-        // Logic for Sunday: Save SelectedFormat to your cart list
-        NavigationManager.NavigateTo("/books");
+        if (book != null && SelectedFormat != null)
+        {
+            CartService.AddToCart(book, SelectedFormat);
+            NavigationManager.NavigateTo("/cart");
+        }
     }
 }
