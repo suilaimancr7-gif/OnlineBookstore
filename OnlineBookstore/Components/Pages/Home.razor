@@ -1,7 +1,126 @@
 ﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using OnlineBookstore.Domain
+@inject SignInManager<OnlineBookstoreUser> SignInManager
+@inject UserManager<OnlineBookstoreUser> UserManager
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<AuthorizeView>
+    <Authorized>
+        <div class="container text-center mt-5">
+            <h1>Welcome back, @context.User.Identity?.Name!</h1>
+            <p class="lead">You are successfully logged in.</p>
+            <div class="mt-4">
+                <a href="books" class="btn btn-primary btn-lg me-2">Browse Books</a>
+                <form action="Account/Logout" method="post" class="d-inline">
+                    <AntiforgeryToken />
+                    <button type="submit" class="btn btn-outline-danger btn-lg">Logout</button>
+                </form>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container mt-5">
+            <div class="text-center mb-5">
+                <h1>Welcome to OnlineBookstore</h1>
+                <p class="lead">Please log in or create an account to start shopping.</p>
+            </div>
 
-Welcome to your new app.
+            <div class="row mt-4 justify-content-center">
+                <div class="col-md-5 p-4 border rounded bg-light shadow-sm me-md-4">
+                    <h3 class="mb-3">Login</h3>
+                    <EditForm Model="LoginInput" OnValidSubmit="LoginUser" FormName="loginForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <InputText @bind-Value="LoginInput.Email" class="form-control" placeholder="name@example.com" />
+                            <ValidationMessage For="() => LoginInput.Email" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText type="password" @bind-Value="LoginInput.Password" class="form-control" />
+                            <ValidationMessage For="() => LoginInput.Password" class="text-danger" />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">Log In</button>
+                    </EditForm>
+                </div>
+
+                <div class="col-md-5 p-4 border rounded bg-white shadow-sm mt-4 mt-md-0">
+                    <h3 class="mb-3">Sign Up</h3>
+                    <EditForm Model="RegisterInput" OnValidSubmit="RegisterUser" FormName="registerForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <InputText @bind-Value="RegisterInput.FirstName" class="form-control" />
+                            <ValidationMessage For="() => RegisterInput.FirstName" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <InputText @bind-Value="RegisterInput.Email" class="form-control" />
+                            <ValidationMessage For="() => RegisterInput.Email" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText type="password" @bind-Value="RegisterInput.Password" class="form-control" />
+                            <ValidationMessage For="() => RegisterInput.Password" class="text-danger" />
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2">Create Account</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [SupplyParameterFromForm]
+    private LoginModel LoginInput { get; set; } = new();
+
+    [SupplyParameterFromForm]
+    private RegisterModel RegisterInput { get; set; } = new();
+
+    private async Task LoginUser()
+    {
+        var result = await SignInManager.PasswordSignInAsync(LoginInput.Email, LoginInput.Password, false, false);
+        if (result.Succeeded)
+        {
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+    private async Task RegisterUser()
+    {
+        var user = new OnlineBookstoreUser
+        {
+            UserName = RegisterInput.Email,
+            Email = RegisterInput.Email,
+            FirstName = RegisterInput.FirstName
+        };
+
+        var result = await UserManager.CreateAsync(user, RegisterInput.Password);
+        if (result.Succeeded)
+        {
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+    public class LoginModel
+    {
+        [Required, EmailAddress] public string Email { get; set; } = "";
+        [Required] public string Password { get; set; } = "";
+    }
+
+    public class RegisterModel
+    {
+        [Required] public string FirstName { get; set; } = "";
+        [Required, EmailAddress] public string Email { get; set; } = "";
+        [Required, MinLength(6)] public string Password { get; set; } = "";
+    }
+}

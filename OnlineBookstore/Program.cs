@@ -8,24 +8,28 @@ using OnlineBookstore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database Connection - Matches your appsettings.json
+// 1. Database Connection - Configured for design-time migrations
 var connectionString = builder.Configuration.GetConnectionString("OnlineBookstoreContext")
     ?? throw new InvalidOperationException("Connection string 'OnlineBookstoreContext' not found.");
 
 builder.Services.AddDbContext<OnlineBookstoreContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 2. Identity Configuration - Following Week 6/7 Lab Skeleton
+// 2. Identity Configuration - Standard Identity Setup
 builder.Services.AddIdentityCore<OnlineBookstoreUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<OnlineBookstoreContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-// 3. Repository Pattern - The "CarRental" Skeleton requirement
+// 3. Fix for 'System.TimeProvider' Error
+// This service is required by modern Identity SecurityStampValidators
+builder.Services.AddSingleton(TimeProvider.System);
+
+// 4. Repository Pattern - The "CarRental" Skeleton requirement
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// 4. Standard Blazor/Razor Services
+// 5. Standard Blazor/Razor Services
 builder.Services.AddRazorPages();
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -48,13 +52,20 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseAntiforgery(); // Required for Blazor forms and Identity
+app.UseAntiforgery(); // Essential for Blazor and Identity security
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// 5. Map Identity Routes (Matches Lab 6/7)
-// Ensure you have scaffolded your Identity pages for this to work.
+// 6. Map Identity and Razor Pages
 app.MapRazorPages();
+
+app.MapPost("Account/Logout", async (
+    SignInManager<OnlineBookstoreUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
+});
+
 
 app.Run();

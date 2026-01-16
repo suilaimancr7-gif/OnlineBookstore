@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace OnlineBookstore.Domain
+namespace OnlineBookstore.Domain.Data
 {
     public class OnlineBookstoreUser : IdentityUser
     {

@@ -13,6 +13,7 @@ namespace OnlineBookstore.Domain.Entities
 
         public double PricePhysical { get; set; }
         public double PriceSoftcopy { get; set; }
+        public int? StockQuantity { get; set; }
 
         public int? AuthorId { get; set; }
         public virtual Author? Author { get; set; }

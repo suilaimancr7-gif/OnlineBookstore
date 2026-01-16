@@ -1,7 +1,7 @@
 ﻿@page "/books/edit"
-@using Microsoft.EntityFrameworkCore
 @using OnlineBookstore.Domain.Entities
-@inject IDbContextFactory<OnlineBookstore.Domain.Data.OnlineBookstoreContext> DbFactory
+@using OnlineBookstore.Infrastructure.Contracts
+@inject IGenericRepository<Book> BookRepo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit</PageTitle>
@@ -10,6 +10,7 @@
 
 <h2>Book</h2>
 <hr />
+
 @if (Book is null)
 {
     <p><em>Loading...</em></p>
@@ -20,64 +21,45 @@ else
         <div class="col-md-4">
             <EditForm method="post" Model="Book" OnValidSubmit="UpdateBook" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
+                <ValidationSummary role="alert" />
                 <input type="hidden" name="Book.Id" value="@Book.Id" />
+
                 <div class="mb-3">
-                <span class="text-danger">*</span>
                     <label for="title" class="form-label">Title:</label>
-                    <InputText id="title" @bind-Value="Book.Title" class="form-control" aria-required="true"/>
+                    <InputText id="title" @bind-Value="Book.Title" class="form-control" />
                     <ValidationMessage For="() => Book.Title" class="text-danger" />
                 </div>
-                <div class="mb-3">
-                    <label for="author" class="form-label">Author:</label>
-                    <InputText id="author" @bind-Value="Book.Author" class="form-control" />
-                    <ValidationMessage For="() => Book.Author" class="text-danger" />
-                </div>
+
                 <div class="mb-3">
                     <label for="isbn" class="form-label">ISBN:</label>
                     <InputText id="isbn" @bind-Value="Book.ISBN" class="form-control" />
                     <ValidationMessage For="() => Book.ISBN" class="text-danger" />
                 </div>
+
                 <div class="mb-3">
-                    <label for="pricephysical" class="form-label">PricePhysical:</label>
+                    <label for="pricephysical" class="form-label">Price Physical:</label>
                     <InputNumber id="pricephysical" @bind-Value="Book.PricePhysical" class="form-control" />
                     <ValidationMessage For="() => Book.PricePhysical" class="text-danger" />
                 </div>
+
                 <div class="mb-3">
-                    <label for="pricesoftcopy" class="form-label">PriceSoftcopy:</label>
+                    <label for="pricesoftcopy" class="form-label">Price Softcopy:</label>
                     <InputNumber id="pricesoftcopy" @bind-Value="Book.PriceSoftcopy" class="form-control" />
                     <ValidationMessage For="() => Book.PriceSoftcopy" class="text-danger" />
                 </div>
+
                 <div class="mb-3">
-                    <label for="stockquantity" class="form-label">StockQuantity:</label>
+                    <label for="stockquantity" class="form-label">Stock Quantity:</label>
                     <InputNumber id="stockquantity" @bind-Value="Book.StockQuantity" class="form-control" />
                     <ValidationMessage For="() => Book.StockQuantity" class="text-danger" />
                 </div>
+
                 <div class="mb-3">
                     <label for="genreid" class="form-label">GenreId:</label>
                     <InputNumber id="genreid" @bind-Value="Book.GenreId" class="form-control" />
                     <ValidationMessage For="() => Book.GenreId" class="text-danger" />
                 </div>
-                <div class="mb-3">
-                    <label for="datecreated" class="form-label">DateCreated:</label>
-                    <InputDate id="datecreated" @bind-Value="Book.DateCreated" class="form-control" />
-                    <ValidationMessage For="() => Book.DateCreated" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="dateupdated" class="form-label">DateUpdated:</label>
-                    <InputDate id="dateupdated" @bind-Value="Book.DateUpdated" class="form-control" />
-                    <ValidationMessage For="() => Book.DateUpdated" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="createdby" class="form-label">CreatedBy:</label>
-                    <InputText id="createdby" @bind-Value="Book.CreatedBy" class="form-control" />
-                    <ValidationMessage For="() => Book.CreatedBy" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="updatedby" class="form-label">UpdatedBy:</label>
-                    <InputText id="updatedby" @bind-Value="Book.UpdatedBy" class="form-control" />
-                    <ValidationMessage For="() => Book.UpdatedBy" class="text-danger" />
-                </div>
+
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
         </div>
@@ -97,8 +79,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        Book ??= await context.Books.FirstOrDefaultAsync(m => m.Id == Id);
+        Book ??= await BookRepo.Get(m => m.Id == Id);
 
         if (Book is null)
         {
@@ -106,20 +87,15 @@ else
         }
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateBook()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Attach(Book!).State = EntityState.Modified;
-
         try
         {
-            await context.SaveChangesAsync();
+            await BookRepo.Update(Book!);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!BookExists(Book!.Id))
+            if (!await BookExists(Book!.Id))
             {
                 NavigationManager.NavigateTo("notfound");
             }
@@ -132,9 +108,9 @@ else
         NavigationManager.NavigateTo("/books");
     }
 
-    private bool BookExists(int id)
+    private async Task<bool> BookExists(int id)
     {
-        using var context = DbFactory.CreateDbContext();
-        return context.Books.Any(e => e.Id == id);
+        var book = await BookRepo.Get(e => e.Id == id);
+        return book != null;
     }
 }

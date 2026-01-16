@@ -1,46 +1,92 @@
 ﻿@page "/books"
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using OnlineBookstore.Domain.Entities
-@using OnlineBookstore.Domain.Data
-@implements IAsyncDisposable
-@inject IDbContextFactory<OnlineBookstore.Domain.Data.OnlineBookstoreContext> DbFactory
+@using OnlineBookstore.Infrastructure.Contracts
+@inject IGenericRepository<Book> BookRepo
+@implements IDisposable
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Books</PageTitle>
 
-<h1>Index</h1>
+<h1>Books</h1>
 
 <p>
-    <a href="books/create">Create New</a>
+    <a href="books/create" class="btn btn-primary">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Books">
-    <PropertyColumn Property="book => book.Title" />
-    <PropertyColumn Property="book => book.Author" />
-    <PropertyColumn Property="book => book.ISBN" />
-    <PropertyColumn Property="book => book.PricePhysical" />
-    <PropertyColumn Property="book => book.PriceSoftcopy" />
-    <PropertyColumn Property="book => book.StockQuantity" />
-    <PropertyColumn Property="book => book.GenreId" />
-    <PropertyColumn Property="book => book.DateCreated" />
-    <PropertyColumn Property="book => book.DateUpdated" />
-    <PropertyColumn Property="book => book.CreatedBy" />
-    <PropertyColumn Property="book => book.UpdatedBy" />
+<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Search by Title or Author..."
+           @bind="SearchTerm" @bind:event="oninput" @onkeyup="HandleSearch" />
+    <button class="btn btn-outline-secondary" type="button" @onclick="HandleSearch">Search</button>
+</div>
 
-    <TemplateColumn Context="book">
-        <a href="@($"books/edit?id={book.Id}")">Edit</a> |
-        <a href="@($"books/details?id={book.Id}")">Details</a> |
-        <a href="@($"books/delete?id={book.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+@if (FilteredBooks == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Cover</th>
+                <th>Title</th>
+                <th>ISBN</th>
+                <th>Price (Physical)</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in FilteredBooks)
+            {
+                <tr>
+                    <td>
+                        <img src="@book.ImageLink" alt="Cover" style="width: 60px; height: auto;"
+                             onerror="this.src='/favicon.png';" />
+                    </td>
+                    <td>@book.Title</td>
+                    <td>@book.ISBN</td>
+                    <td>@book.PricePhysical.ToString("C")</td>
+                    <td>@book.StockQuantity</td>
+                    <td>
+                        <a href="@($"books/edit?id={book.Id}")" class="btn btn-warning btn-sm">Edit</a> |
+                        <a href="@($"books/details?id={book.Id}")" class="btn btn-info btn-sm">Details</a> |
+                        <a href="@($"books/delete?id={book.Id}")" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private OnlineBookstoreContext context = default!;
+    private List<Book>? AllBooks;
+    private List<Book>? FilteredBooks;
+    private string SearchTerm = "";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        // Fetch books including related data like Author/Genre if needed
+        AllBooks = (await BookRepo.GetAll()).ToList();
+        FilteredBooks = AllBooks;
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    private void HandleSearch()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            FilteredBooks = AllBooks;
+        }
+        else
+        {
+            FilteredBooks = AllBooks?.Where(b =>
+                (b.Title?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (b.ISBN?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
+            ).ToList();
+        }
+    }
+
+    public void Dispose()
+    {
+        // Cleanup if necessary
+    }
 }
