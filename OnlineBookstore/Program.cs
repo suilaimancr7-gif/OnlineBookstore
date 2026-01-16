@@ -4,6 +4,7 @@ using OnlineBookstore.Domain.Data;
 using OnlineBookstore.Domain;
 using OnlineBookstore.Infrastructure.Contracts;
 using OnlineBookstore.Infrastructure.Repositories;
+using OnlineBookstore.Infrastructure.Services; // Ensure this matches your service namespace
 using OnlineBookstore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +33,11 @@ builder.Services.AddAuthentication(options =>
 .AddIdentityCookies();
 
 builder.Services.AddSingleton(TimeProvider.System);
+
+// --- Custom Service Registrations ---
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+// This line fixes the 'InvalidOperationException'
+builder.Services.AddScoped<CartService>();
 
 builder.Services.AddRazorPages();
 builder.Services.AddQuickGridEntityFrameworkAdapter();

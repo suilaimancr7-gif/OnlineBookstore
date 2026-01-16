@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark d-flex align-items-center justify-content-between">
+﻿@implements IDisposable
+@inject OnlineBookstore.Infrastructure.Services.CartService CartService
+
+<div class="top-row ps-3 navbar navbar-dark d-flex align-items-center justify-content-between">
     <div class="container-fluid d-flex align-items-center justify-content-between w-100">
 
         <div class="d-flex align-items-center">
@@ -23,7 +26,7 @@
                         <i class="bi bi-cart3 fs-4"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                               style="font-size: 0.65rem;">
-                            0
+                            @CartService.GetCount()
                         </span>
                     </a>
                 </Authorized>
@@ -62,3 +65,17 @@
         </div>
     </nav>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Subscribe to the event so the badge updates in real-time
+        CartService.OnCartChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe to prevent memory leaks
+        CartService.OnCartChanged -= StateHasChanged;
+    }
+}
