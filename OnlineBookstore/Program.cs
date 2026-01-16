@@ -8,28 +8,32 @@ using OnlineBookstore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Database Connection - Configured for design-time migrations
+// 1. Database Connection
 var connectionString = builder.Configuration.GetConnectionString("OnlineBookstoreContext")
     ?? throw new InvalidOperationException("Connection string 'OnlineBookstoreContext' not found.");
 
 builder.Services.AddDbContext<OnlineBookstoreContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 2. Identity Configuration - Standard Identity Setup
+// 2. Identity Configuration
 builder.Services.AddIdentityCore<OnlineBookstoreUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<OnlineBookstoreContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-// 3. Fix for 'System.TimeProvider' Error
-// This service is required by modern Identity SecurityStampValidators
-builder.Services.AddSingleton(TimeProvider.System);
+// Register Authentication and Cookies
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+.AddIdentityCookies();
 
-// 4. Repository Pattern - The "CarRental" Skeleton requirement
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// 5. Standard Blazor/Razor Services
 builder.Services.AddRazorPages();
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -39,7 +43,6 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -52,20 +55,22 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseAntiforgery(); // Essential for Blazor and Identity security
+app.UseAntiforgery();
+
+// Middlewares for security
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// 6. Map Identity and Razor Pages
 app.MapRazorPages();
 
-app.MapPost("Account/Logout", async (
-    SignInManager<OnlineBookstoreUser> signInManager) =>
+// Custom Logout Endpoint
+app.MapPost("Account/Logout", async (SignInManager<OnlineBookstoreUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
     return Results.Redirect("/");
 });
-
 
 app.Run();

@@ -1,6 +1,35 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">OnlineBookstore</a>
+﻿<div class="top-row ps-3 navbar navbar-dark d-flex align-items-center justify-content-between">
+    <div class="container-fluid d-flex align-items-center justify-content-between w-100">
+
+        <div class="d-flex align-items-center">
+            <AuthorizeView>
+                <Authorized>
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <button type="submit" class="btn btn-outline-danger btn-sm border-0">
+                            <i class="bi bi-box-arrow-left fs-5"></i> Logout
+                        </button>
+                    </form>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+
+        <a class="navbar-brand fw-bold m-0" href="">OnlineBookstore</a>
+
+        <div class="d-flex align-items-center pe-2">
+            <AuthorizeView>
+                <Authorized>
+                    <a href="cart" class="btn btn-outline-light position-relative border-0 p-1">
+                        <i class="bi bi-cart3 fs-4"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              style="font-size: 0.65rem;">
+                            0
+                        </span>
+                    </a>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+
     </div>
 </div>
 
@@ -11,6 +40,12 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="books">
+                <span class="bi bi-book-fill" aria-hidden="true" style="margin-right: 10px;"></span> Books
             </NavLink>
         </div>
 
@@ -27,4 +62,3 @@
         </div>
     </nav>
 </div>
-

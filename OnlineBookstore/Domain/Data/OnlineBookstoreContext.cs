@@ -27,6 +27,8 @@ namespace OnlineBookstore.Domain.Data
             // Placeholder for future seed data configurations
             builder.ApplyConfiguration(new RoleSeed());
             builder.ApplyConfiguration(new UserSeed());
+            builder.ApplyConfiguration(new GenreSeed());
+            builder.ApplyConfiguration(new BookSeed());
         }
     }
 }

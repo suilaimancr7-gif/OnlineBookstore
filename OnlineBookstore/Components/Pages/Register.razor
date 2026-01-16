@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.Identity
 @using OnlineBookstore.Domain
 @inject UserManager<OnlineBookstoreUser> UserManager
-@inject SignInManager<OnlineBookstoreUser> SignInManager
 @inject NavigationManager NavigationManager
 
 <PageTitle>Sign Up</PageTitle>
@@ -14,30 +13,22 @@
             <h3 class="mb-3 text-center">Create Account</h3>
             <EditForm Model="RegisterInput" OnValidSubmit="RegisterUser" FormName="registerForm">
                 <DataAnnotationsValidator />
-
                 <div class="mb-3">
                     <label class="form-label">First Name</label>
                     <InputText @bind-Value="RegisterInput.FirstName" class="form-control" />
-                    <ValidationMessage For="() => RegisterInput.FirstName" class="text-danger" />
                 </div>
-
                 <div class="mb-3">
-                    <label class="form-label">Email Address</label>
+                    <label class="form-label">Email</label>
                     <InputText @bind-Value="RegisterInput.Email" class="form-control" />
-                    <ValidationMessage For="() => RegisterInput.Email" class="text-danger" />
                 </div>
-
                 <div class="mb-3">
                     <label class="form-label">Password</label>
                     <InputText type="password" @bind-Value="RegisterInput.Password" class="form-control" />
-                    <ValidationMessage For="() => RegisterInput.Password" class="text-danger" />
                 </div>
-
                 <button type="submit" class="btn btn-success w-100 py-2">Sign Up</button>
             </EditForm>
-
             <div class="mt-3 text-center">
-                <p>Already have an account? <a href="/">Login here</a></p>
+                <a href="/">Back to Login</a>
             </div>
         </div>
     </div>
@@ -57,12 +48,9 @@
         };
 
         var result = await UserManager.CreateAsync(user, RegisterInput.Password);
-
         if (result.Succeeded)
         {
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            // Launches book pages immediately after successful registration
-            NavigationManager.NavigateTo("/books");
+            NavigationManager.NavigateTo("/");
         }
     }
 
