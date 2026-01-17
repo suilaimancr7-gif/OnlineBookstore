@@ -1,84 +1,73 @@
 ﻿@page "/wishlist"
 @using OnlineBookstore.Domain.Entities
 @using OnlineBookstore.Infrastructure.Contracts
-@using OnlineBookstore.Infrastructure.Services
 @using Microsoft.AspNetCore.Authorization
 @using System.Security.Claims
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IGenericRepository<Wishlist> WishlistRepo
-@inject CartService CartService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavManager
 
 <PageTitle>My Wishlist</PageTitle>
 
 <div class="container mt-4">
-    <h2><i class="bi bi-heart-fill text-danger"></i> My Wishlist</h2>
+    <h1>My Wishlist</h1>
     <hr />
 
-    @if (wishlistItems == null)
+    @if (WishlistItems == null)
     {
-        <div class="spinner-border text-primary" role="status"></div>
+        <p><em>Loading...</em></p>
     }
-    else if (!wishlistItems.Any())
+    else if (!WishlistItems.Any())
     {
-        <div class="alert alert-info">Your wishlist is empty. Browse books to add some!</div>
+        <div class="alert alert-info">Your wishlist is empty. Browse books to add items!</div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            @foreach (var item in wishlistItems)
-            {
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <img src="@item.Book?.ImageLink" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.src='/favicon.png';">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">@item.Book?.Title</h5>
-                            <p class="text-primary fw-bold">@item.Book?.PricePhysical.ToString("C")</p>
-
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-sm" @onclick="() => MoveToCart(item)">
-                                    Move to Cart
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveFromWishlist(item.Id)">
-                                    Remove
-                                </button>
+        <table class="table table-hover shadow-sm border">
+            <thead class="table-dark">
+                <tr>
+                    <th>Book Title</th>
+                    <th>Date Added</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in WishlistItems)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.Book?.Title</td>
+                        <td>@item.DateAdded.ToShortDateString()</td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a href="@($"/wishlist/details?id={item.Id}")" class="btn btn-outline-info btn-sm">Details</a>
+                                <a href="@($"/wishlist/edit?id={item.Id}")" class="btn btn-outline-warning btn-sm mx-1">Edit</a>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => HandleDelete(item.Id)">Remove</button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     }
 </div>
 
 @code {
-    private List<Wishlist>? wishlistItems;
+    private List<Wishlist>? WishlistItems;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync() => await LoadData();
+
+    private async Task LoadData()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        // READ: Fetch items belonging to the logged-in user
-        var allItems = await WishlistRepo.GetAll();
-        wishlistItems = allItems.Where(w => w.CustomerId == userId).ToList();
+        var data = await WishlistRepo.GetAll();
+        WishlistItems = data.Where(w => w.CustomerId == userId).ToList();
     }
 
-    private async Task MoveToCart(Wishlist item)
+    private async Task HandleDelete(int id)
     {
-        if (item.Book != null)
-        {
-            CartService.AddToCart(item.Book, "Physical");
-            await RemoveFromWishlist(item.Id);
-        }
-    }
-
-    private async Task RemoveFromWishlist(int id)
-    {
-        // DELETE: Remove item from database
         await WishlistRepo.Delete(id);
-        wishlistItems = wishlistItems?.Where(i => i.Id != id).ToList();
+        await LoadData();
     }
 }

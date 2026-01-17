@@ -20,5 +20,6 @@ namespace OnlineBookstore.Domain.Entities
 
         public int? GenreId { get; set; }
         public virtual Genre? Genre { get; set; }
+        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
     }
 }

@@ -1,0 +1,48 @@
+﻿@page "/wishlist/edit"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IGenericRepository<Wishlist> WishlistRepo
+@inject NavigationManager NavManager
+
+<div class="container mt-4">
+    <h3>Edit Wishlist Entry</h3>
+    <hr />
+
+    @if (item == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 p-4">
+            <EditForm Model="item" OnValidSubmit="HandleUpdate">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Book:</label>
+                    <input class="form-control" value="@item.Book?.Title" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Date Added:</label>
+                    <InputDate @bind-Value="item.DateAdded" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="/wishlist" class="btn btn-secondary ms-2">Cancel</a>
+            </EditForm>
+        </div>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int Id { get; set; }
+    private Wishlist? item;
+
+    protected override async Task OnInitializedAsync() => item = await WishlistRepo.Get(q => q.Id == Id);
+
+    private async Task HandleUpdate()
+    {
+        await WishlistRepo.Update(item!);
+        NavManager.NavigateTo("/wishlist");
+    }
+}

@@ -6,7 +6,7 @@ namespace OnlineBookstore.Domain.Entities
     public class Wishlist : BaseDomainEntity
     {
         [Required]
-        public string? CustomerId { get; set; }
+        public string? CustomerId { get; set; } // Links to the logged-in User
 
         public int BookId { get; set; }
         public virtual Book? Book { get; set; }

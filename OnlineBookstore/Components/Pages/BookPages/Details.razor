@@ -3,11 +3,14 @@
 @using OnlineBookstore.Infrastructure.Contracts
 @using OnlineBookstore.Infrastructure.Services
 @using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IGenericRepository<Book> BookRepo
+@inject IGenericRepository<Wishlist> WishlistRepo
 @inject CartService CartService
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 @if (book != null)
 {
@@ -17,7 +20,14 @@
                 <img src="@book.ImageLink" class="img-fluid rounded shadow" style="max-height: 400px;" />
             </div>
             <div class="col-md-8">
-                <h1>@book.Title</h1>
+                <div class="d-flex justify-content-between align-items-start">
+                    <h1>@book.Title</h1>
+                    @* WISHLIST CREATE: Adds book to user's saved list *@
+                    <button class="btn btn-outline-danger border-0" @onclick="AddToWishlist" title="Add to Wishlist">
+                        <i class="bi bi-heart-fill fs-3"></i>
+                    </button>
+                </div>
+
                 <p class="lead">@book.Description</p>
 
                 <div class="card p-3 my-4 bg-light">
@@ -35,6 +45,11 @@
                 <button class="btn btn-success btn-lg w-100" disabled="@(string.IsNullOrEmpty(SelectedFormat))" @onclick="AddToCart">
                     Add to Cart
                 </button>
+
+                @if (!string.IsNullOrEmpty(wishlistMessage))
+                {
+                    <div class="alert alert-info mt-3 py-2 text-center">@wishlistMessage</div>
+                }
             </div>
         </div>
     </div>
@@ -44,9 +59,12 @@
     [SupplyParameterFromQuery] private int Id { get; set; }
     private Book? book;
     private string? SelectedFormat;
+    private string wishlistMessage = "";
 
     protected override async Task OnInitializedAsync() => book = await BookRepo.Get(q => q.Id == Id);
+
     private void HandleChange(ChangeEventArgs e) => SelectedFormat = e.Value?.ToString();
+
     private void AddToCart()
     {
         if (book != null && SelectedFormat != null)
@@ -54,5 +72,30 @@
             CartService.AddToCart(book, SelectedFormat);
             NavigationManager.NavigateTo("/cart");
         }
+    }
+
+    private async Task AddToWishlist()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // Prevent duplicate entries for the same user
+        var existing = await WishlistRepo.GetAll();
+        if (existing.Any(w => w.BookId == book!.Id && w.CustomerId == userId))
+        {
+            wishlistMessage = "This book is already in your wishlist!";
+            return;
+        }
+
+        // CREATE: Logic to save the item to the database
+        var entry = new Wishlist
+        {
+            BookId = book!.Id,
+            CustomerId = userId,
+            DateAdded = DateTime.Now
+        };
+
+        await WishlistRepo.Insert(entry);
+        wishlistMessage = "Book added to your wishlist!";
     }
 }

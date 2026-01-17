@@ -1,0 +1,42 @@
+﻿@page "/wishlist/details"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject IGenericRepository<Wishlist> WishlistRepo
+
+<div class="container mt-4">
+    <h3>Wishlist Item Details</h3>
+    <hr />
+
+    @if (item == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 p-4">
+            <dl class="row">
+                <dt class="col-sm-3">Book Title</dt>
+                <dd class="col-sm-9">@item.Book?.Title</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@item.Book?.Description</dd>
+
+                <dt class="col-sm-3">Added On</dt>
+                <dd class="col-sm-9">@item.DateAdded.ToString("f")</dd>
+            </dl>
+            <div>
+                <a href="@($"/wishlist/edit?id={item.Id}")" class="btn btn-warning">Edit</a>
+                <a href="/wishlist" class="btn btn-secondary ms-2">Back to List</a>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int Id { get; set; }
+    private Wishlist? item;
+
+    protected override async Task OnInitializedAsync() => item = await WishlistRepo.Get(q => q.Id == Id);
+}

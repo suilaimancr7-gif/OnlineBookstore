@@ -50,18 +50,26 @@
             </NavLink>
         </div>
 
-        @* Admin Tools: Removed Admin CRUD link *@
+        @* Wishlist link for all authorized users *@
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="wishlist">
+                        <span class="bi bi-heart-fill text-danger" aria-hidden="true" style="margin-right: 10px;"></span> My Wishlist
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
         <AuthorizeView Roles="Administrator">
             <Authorized>
                 <hr class="text-white mx-3" />
                 <div class="nav-item px-3 text-white-50 small ms-3">ADMIN TOOLS</div>
-
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="orders">
                         <span class="bi bi-receipt-cutoff" aria-hidden="true" style="margin-right: 10px;"></span> View All Orders
                     </NavLink>
                 </div>
-
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="books/create">
                         <span class="bi bi-plus-square-fill" aria-hidden="true" style="margin-right: 10px;"></span> Add New Book
