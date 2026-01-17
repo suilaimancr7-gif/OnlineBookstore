@@ -1,73 +1,91 @@
 ﻿@page "/books/edit"
 @using OnlineBookstore.Domain.Entities
 @using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Administrator")]
 @inject IGenericRepository<Book> BookRepo
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit</PageTitle>
+<PageTitle>Admin: Edit Book Stock</PageTitle>
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <h1>Edit Book Details</h1>
+    <p class="text-muted">Modify stock levels, prices, and information.</p>
+    <hr />
 
-<h2>Book</h2>
-<hr />
-
-@if (Book is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-4">
-            <EditForm method="post" Model="Book" OnValidSubmit="UpdateBook" FormName="edit" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary role="alert" />
-                <input type="hidden" name="Book.Id" value="@Book.Id" />
-
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title:</label>
-                    <InputText id="title" @bind-Value="Book.Title" class="form-control" />
-                    <ValidationMessage For="() => Book.Title" class="text-danger" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="isbn" class="form-label">ISBN:</label>
-                    <InputText id="isbn" @bind-Value="Book.ISBN" class="form-control" />
-                    <ValidationMessage For="() => Book.ISBN" class="text-danger" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="pricephysical" class="form-label">Price Physical:</label>
-                    <InputNumber id="pricephysical" @bind-Value="Book.PricePhysical" class="form-control" />
-                    <ValidationMessage For="() => Book.PricePhysical" class="text-danger" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="pricesoftcopy" class="form-label">Price Softcopy:</label>
-                    <InputNumber id="pricesoftcopy" @bind-Value="Book.PriceSoftcopy" class="form-control" />
-                    <ValidationMessage For="() => Book.PriceSoftcopy" class="text-danger" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="stockquantity" class="form-label">Stock Quantity:</label>
-                    <InputNumber id="stockquantity" @bind-Value="Book.StockQuantity" class="form-control" />
-                    <ValidationMessage For="() => Book.StockQuantity" class="text-danger" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="genreid" class="form-label">GenreId:</label>
-                    <InputNumber id="genreid" @bind-Value="Book.GenreId" class="form-control" />
-                    <ValidationMessage For="() => Book.GenreId" class="text-danger" />
-                </div>
-
-                <button type="submit" class="btn btn-primary">Save</button>
-            </EditForm>
+    @if (Book is null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading book data...</p>
         </div>
-    </div>
-}
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <EditForm method="post" Model="Book" OnValidSubmit="UpdateBook" FormName="edit" Enhance>
+                    <DataAnnotationsValidator />
+                    <ValidationSummary role="alert" class="text-danger" />
+                    <input type="hidden" name="Book.Id" value="@Book.Id" />
 
-<div>
-    <a href="/books">Back to List</a>
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-bold">Title:</label>
+                        <InputText id="title" @bind-Value="Book.Title" class="form-control" />
+                        <ValidationMessage For="() => Book.Title" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="isbn" class="form-label fw-bold">ISBN:</label>
+                        <InputText id="isbn" @bind-Value="Book.ISBN" class="form-control" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="pricephysical" class="form-label fw-bold">Price Physical:</label>
+                            <InputNumber id="pricephysical" @bind-Value="Book.PricePhysical" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="pricesoftcopy" class="form-label fw-bold">Price Softcopy:</label>
+                            <InputNumber id="pricesoftcopy" @bind-Value="Book.PriceSoftcopy" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="stockquantity" class="form-label fw-bold text-primary">Current Stock Quantity:</label>
+                        <InputNumber id="stockquantity" @bind-Value="Book.StockQuantity" class="form-control border-primary" />
+                        <ValidationMessage For="() => Book.StockQuantity" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imagelink" class="form-label fw-bold">Image URL (Cover Art):</label>
+                        <InputText id="imagelink" @bind-Value="Book.ImageLink" class="form-control" placeholder="https://..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="genreid" class="form-label fw-bold">Genre ID:</label>
+                        <InputNumber id="genreid" @bind-Value="Book.GenreId" class="form-control" />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4">Save Changes</button>
+                        <a href="/books" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </EditForm>
+            </div>
+
+            @* Visual Preview for the Admin *@
+            <div class="col-md-4 offset-md-1">
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-light">Cover Preview</div>
+                    <div class="card-body text-center">
+                        <img src="@Book.ImageLink" class="img-fluid rounded" style="max-height: 300px;" onerror="this.src='/favicon.png';" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -79,6 +97,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Load existing book data from SQL Server
         Book ??= await BookRepo.Get(m => m.Id == Id);
 
         if (Book is null)
@@ -91,7 +110,9 @@ else
     {
         try
         {
+            // Persist the Admin's changes to the database
             await BookRepo.Update(Book!);
+            NavigationManager.NavigateTo("/books");
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -104,8 +125,6 @@ else
                 throw;
             }
         }
-
-        NavigationManager.NavigateTo("/books");
     }
 
     private async Task<bool> BookExists(int id)

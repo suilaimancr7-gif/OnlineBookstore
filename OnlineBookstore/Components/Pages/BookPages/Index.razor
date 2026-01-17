@@ -4,10 +4,11 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @attribute [Authorize]
+@rendermode InteractiveServer
 @inject IGenericRepository<Book> BookRepo
 @inject NavigationManager NavigationManager
 
-<PageTitle>Book Collection</PageTitle>
+<PageTitle>Book Inventory</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Book Collection</h1>
@@ -15,12 +16,10 @@
     <div class="d-flex align-items-center">
         <AuthorizeView>
             <Authorized>
-                <span class="badge bg-info text-dark me-3 p-2">Logged in as: @context.User.Identity?.Name</span>
-
-                @* Logout button leads back to Login via Program.cs MapPost *@
+                <span class="badge bg-info text-dark me-3 p-2">Status: @(context.User.IsInRole("Admin") || context.User.IsInRole("Administrator") ? "Admin" : "User")</span>
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
-                    <button type="submit" class="btn btn-outline-danger">Logout</button>
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
                 </form>
             </Authorized>
         </AuthorizeView>
@@ -29,15 +28,12 @@
 
 <hr />
 
-@* ONLY Admin can see the Create button *@
-<AuthorizeView Roles="Administrator">
-    <p>
-        <a href="books/create" class="btn btn-primary shadow-sm mb-3">Create New Book</a>
-    </p>
+<AuthorizeView Roles="Admin, Administrator">
+    <p><a href="books/create" class="btn btn-primary shadow-sm mb-3">Create New Book</a></p>
 </AuthorizeView>
 
 <div class="input-group mb-3 shadow-sm">
-    <input type="text" class="form-control" placeholder="Search by Title or ISBN..."
+    <input type="text" class="form-control" placeholder="Search Title or ISBN..."
            @bind="SearchTerm" @bind:event="oninput" @onkeyup="HandleSearch" />
     <button class="btn btn-primary" type="button" @onclick="HandleSearch">Search</button>
 </div>
@@ -46,7 +42,6 @@
 {
     <div class="text-center p-5">
         <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2">Fetching your books...</p>
     </div>
 }
 else
@@ -57,7 +52,6 @@ else
                 <tr>
                     <th>Cover</th>
                     <th>Title</th>
-                    <th>ISBN</th>
                     <th>Price</th>
                     <th>Stock</th>
                     <th class="text-center">Actions</th>
@@ -67,23 +61,20 @@ else
                 @foreach (var book in FilteredBooks)
                 {
                     <tr>
-                        <td>
-                            <img src="@book.ImageLink" class="rounded shadow-sm"
-                                 style="width: 50px; height: 75px; object-fit: cover;"
-                                 onerror="this.src='/favicon.png';" />
-                        </td>
+                        <td><img src="@book.ImageLink" style="width: 50px; height: 75px; object-fit: cover;" onerror="this.src='/favicon.png';" /></td>
                         <td class="fw-bold">@book.Title</td>
-                        <td class="text-muted">@book.ISBN</td>
                         <td>@book.PricePhysical.ToString("C")</td>
-                        <td>@book.StockQuantity</td>
+                        <td>
+                            <span class="badge @(book.StockQuantity <= 5 ? "bg-danger" : "bg-success")">
+                                @book.StockQuantity
+                            </span>
+                        </td>
                         <td class="text-center">
                             <div class="btn-group">
-                                @* Regular Users (Sarah) only see Details *@
                                 <a href="@($"books/details?id={book.Id}")" class="btn btn-outline-info btn-sm">Details</a>
 
-                                @* ONLY Admin can see Edit and Delete *@
-                                <AuthorizeView Roles="Administrator">
-                                    <a href="@($"books/edit?id={book.Id}")" class="btn btn-outline-warning btn-sm mx-1">Edit</a>
+                                <AuthorizeView Roles="Admin, Administrator">
+                                    <a href="@($"books/edit?id={book.Id}")" class="btn btn-outline-warning btn-sm mx-1">Edit Stock</a>
                                     <a href="@($"books/delete?id={book.Id}")" class="btn btn-outline-danger btn-sm">Delete</a>
                                 </AuthorizeView>
                             </div>
@@ -102,7 +93,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Pulls data via Repository pattern
         var data = await BookRepo.GetAll();
         AllBooks = data.ToList();
         FilteredBooks = AllBooks;
@@ -110,10 +100,7 @@ else
 
     private void HandleSearch()
     {
-        if (string.IsNullOrWhiteSpace(SearchTerm))
-        {
-            FilteredBooks = AllBooks;
-        }
+        if (string.IsNullOrWhiteSpace(SearchTerm)) FilteredBooks = AllBooks;
         else
         {
             FilteredBooks = AllBooks?.Where(b =>

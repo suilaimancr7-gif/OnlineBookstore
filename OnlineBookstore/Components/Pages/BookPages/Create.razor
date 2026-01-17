@@ -1,70 +1,121 @@
 ﻿@page "/books/create"
 @using OnlineBookstore.Domain.Entities
 @using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin, Administrator")]
+@rendermode InteractiveServer
 @inject IGenericRepository<Book> BookRepo
-@inject IGenericRepository<Genre> GenreRepo
 @inject IGenericRepository<Author> AuthorRepo
+@inject IGenericRepository<Genre> GenreRepo
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Admin | Add New Book</PageTitle>
 
-<h1>Create</h1>
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0"><i class="bi bi-plus-square"></i> Add New Book to Inventory</h4>
+        </div>
+        <div class="card-body p-4">
+            @* Added FormName and Model to ensure clear delegate conversion *@
+            <EditForm Model="NewBook" OnValidSubmit="HandleCreate" FormName="createBookForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
 
-<h2>Book</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="Book" OnValidSubmit="AddBook" FormName="create" Enhance>
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label fw-bold">Book Title</label>
+                        <InputText @bind-Value="NewBook.Title" class="form-control" placeholder="Enter book title" />
+                        <ValidationMessage For="@(() => NewBook.Title)" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">ISBN</label>
+                        <InputText @bind-Value="NewBook.ISBN" class="form-control" />
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="title" class="form-label">Title:</label>
-                <InputText id="title" @bind-Value="Book.Title" class="form-control" />
-                <ValidationMessage For="() => Book.Title" class="text-danger" />
-            </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Physical Price</label>
+                        <InputNumber @bind-Value="NewBook.PricePhysical" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold text-primary">Initial Stock</label>
+                        @* Fixed CS1662 by ensuring proper binding for nullable int? *@
+                        <InputNumber @bind-Value="NewBook.StockQuantity" class="form-control border-primary" />
+                        <ValidationMessage For="@(() => NewBook.StockQuantity)" />
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="isbn" class="form-label">ISBN:</label>
-                <InputText id="isbn" @bind-Value="Book.ISBN" class="form-control" />
-                <ValidationMessage For="() => Book.ISBN" class="text-danger" />
-            </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Genre</label>
+                        <InputSelect @bind-Value="NewBook.GenreId" class="form-select">
+                            <option value="">-- Select Genre --</option>
+                            @if (Genres != null)
+                            {
+                                @foreach (var genre in Genres)
+                                {
+                                    <option value="@genre.Id">@genre.Name</option>
+                                }
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Author</label>
+                        <InputSelect @bind-Value="NewBook.AuthorId" class="form-select">
+                            <option value="">-- Select Author --</option>
+                            @if (Authors != null)
+                            {
+                                @foreach (var author in Authors)
+                                {
+                                    @* FIXED CS1061: Changed author.FirstName to author.Name *@
+                                    <option value="@author.Id">@author.Name</option>
+                                }
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="pricephysical" class="form-label">Price Physical:</label>
-                <InputNumber id="pricephysical" @bind-Value="Book.PricePhysical" class="form-control" />
-                <ValidationMessage For="() => Book.PricePhysical" class="text-danger" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Cover Image URL</label>
+                    <InputText @bind-Value="NewBook.ImageLink" class="form-control" />
+                </div>
 
-            <div class="mb-3">
-                <label for="pricesoftcopy" class="form-label">Price Softcopy:</label>
-                <InputNumber id="pricesoftcopy" @bind-Value="Book.PriceSoftcopy" class="form-control" />
-                <ValidationMessage For="() => Book.PriceSoftcopy" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label for="genreid" class="form-label">Genre:</label>
-                <InputNumber id="genreid" @bind-Value="Book.GenreId" class="form-control" />
-                <ValidationMessage For="() => Book.GenreId" class="text-danger" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-success px-5 fw-bold">Confirm and Add Book</button>
+                    <a href="/books" class="btn btn-secondary px-4">Cancel</a>
+                </div>
+            </EditForm>
+        </div>
     </div>
 </div>
 
-<div>
-    <a href="/books">Back to List</a>
-</div>
-
 @code {
-    [SupplyParameterFromForm]
-    private Book Book { get; set; } = new();
+    private Book NewBook = new();
+    private List<Author> Authors = new();
+    private List<Genre> Genres = new();
 
-    private async Task AddBook()
+    protected override async Task OnInitializedAsync()
     {
-        // Use the Repository Pattern as per CarRentalManagement skeleton
-        await BookRepo.Insert(Book);
-        NavigationManager.NavigateTo("/books");
+        // Load data from SQL Server
+        var authorData = await AuthorRepo.GetAll();
+        Authors = authorData?.ToList() ?? new List<Author>();
+
+        var genreData = await GenreRepo.GetAll();
+        Genres = genreData?.ToList() ?? new List<Genre>();
+    }
+
+    private async Task HandleCreate()
+    {
+        try
+        {
+            await BookRepo.Insert(NewBook); // Create in database
+            NavigationManager.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
     }
 }

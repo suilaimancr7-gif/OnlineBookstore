@@ -9,11 +9,11 @@ namespace OnlineBookstore.Domain.Entities
         public string? Title { get; set; }
         public string? ISBN { get; set; }
         public string? Description { get; set; }
-        public string? ImageLink { get; set; } // Required for your picture feature
+        public string? ImageLink { get; set; }
 
         public double PricePhysical { get; set; }
         public double PriceSoftcopy { get; set; }
-        public int? StockQuantity { get; set; }
+        public int? StockQuantity { get; set; } // Matches UI logic
 
         public int? AuthorId { get; set; }
         public virtual Author? Author { get; set; }

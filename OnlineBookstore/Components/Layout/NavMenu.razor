@@ -40,6 +40,7 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
+        @* Public Links *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -52,30 +53,58 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+        @* Admin Management Links (Supports both Role names) *@
+        <AuthorizeView Roles="Admin, Administrator">
+            <Authorized>
+                <hr class="text-white mx-3" />
+                <div class="nav-item px-3 text-white-50 small ms-3">ADMIN TOOLS</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admins">
+                        <span class="bi bi-person-badge-fill" aria-hidden="true" style="margin-right: 10px;"></span> Admin CRUD
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="orders">
+                        <span class="bi bi-receipt-cutoff" aria-hidden="true" style="margin-right: 10px;"></span> View All Orders
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="books/create">
+                        <span class="bi bi-plus-square-fill" aria-hidden="true" style="margin-right: 10px;"></span> Add New Book
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        @* Standard User Links *@
+        <AuthorizeView Roles="User">
+            <Authorized>
+                @* Only show 'My History' if the user is NOT an admin to prevent UI clutter *@
+                @if (!context.User.IsInRole("Admin") && !context.User.IsInRole("Administrator"))
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="orders">
+                            <span class="bi bi-clock-history" aria-hidden="true" style="margin-right: 10px;"></span> My Order History
+                        </NavLink>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+
     </nav>
 </div>
 
 @code {
     protected override void OnInitialized()
     {
-        // Subscribe to the event so the badge updates in real-time
         CartService.OnCartChanged += StateHasChanged;
     }
 
     public void Dispose()
     {
-        // Unsubscribe to prevent memory leaks
         CartService.OnCartChanged -= StateHasChanged;
     }
 }
