@@ -41,6 +41,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 
 // Specific registration for the Admin CRUD entity
 builder.Services.AddScoped<IGenericRepository<Admin>, GenericRepository<Admin>>();
+builder.Services.AddScoped<IGenericRepository<Wishlist>, GenericRepository<Wishlist>>();
 
 builder.Services.AddScoped<CartService>();
 

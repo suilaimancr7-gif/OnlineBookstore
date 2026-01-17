@@ -48,7 +48,7 @@
 
                 @if (!string.IsNullOrEmpty(wishlistMessage))
                 {
-                    <div class="alert alert-info mt-3 py-2 text-center">@wishlistMessage</div>
+                    <div class="alert alert-info mt-3 py-2 text-center shadow-sm">@wishlistMessage</div>
                 }
             </div>
         </div>
@@ -77,7 +77,14 @@
     private async Task AddToWishlist()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            wishlistMessage = "Please log in to add items to your wishlist.";
+            return;
+        }
 
         // Prevent duplicate entries for the same user
         var existing = await WishlistRepo.GetAll();
