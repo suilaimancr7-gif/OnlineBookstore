@@ -3,7 +3,6 @@
 
 <div class="top-row ps-3 navbar navbar-dark d-flex align-items-center justify-content-between">
     <div class="container-fluid d-flex align-items-center justify-content-between w-100">
-
         <div class="d-flex align-items-center">
             <AuthorizeView>
                 <Authorized>
@@ -32,7 +31,6 @@
                 </Authorized>
             </AuthorizeView>
         </div>
-
     </div>
 </div>
 
@@ -40,7 +38,6 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        @* Public Links *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -53,17 +50,11 @@
             </NavLink>
         </div>
 
-        @* Admin Management Links (Supports both Role names) *@
-        <AuthorizeView Roles="Admin, Administrator">
+        @* Admin Tools: Removed Admin CRUD link *@
+        <AuthorizeView Roles="Administrator">
             <Authorized>
                 <hr class="text-white mx-3" />
                 <div class="nav-item px-3 text-white-50 small ms-3">ADMIN TOOLS</div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="admins">
-                        <span class="bi bi-person-badge-fill" aria-hidden="true" style="margin-right: 10px;"></span> Admin CRUD
-                    </NavLink>
-                </div>
 
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="orders">
@@ -79,11 +70,9 @@
             </Authorized>
         </AuthorizeView>
 
-        @* Standard User Links *@
         <AuthorizeView Roles="User">
             <Authorized>
-                @* Only show 'My History' if the user is NOT an admin to prevent UI clutter *@
-                @if (!context.User.IsInRole("Admin") && !context.User.IsInRole("Administrator"))
+                @if (!context.User.IsInRole("Administrator"))
                 {
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="orders">
@@ -93,7 +82,6 @@
                 }
             </Authorized>
         </AuthorizeView>
-
     </nav>
 </div>
 

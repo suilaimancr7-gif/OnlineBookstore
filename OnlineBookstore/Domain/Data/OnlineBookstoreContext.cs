@@ -27,6 +27,7 @@ namespace OnlineBookstore.Domain.Data
 
             builder.ApplyConfiguration(new RoleSeed());
             builder.ApplyConfiguration(new UserSeed());
+            builder.ApplyConfiguration(new UserRoleSeed());
             builder.ApplyConfiguration(new GenreSeed());
             builder.ApplyConfiguration(new BookSeed());
         }

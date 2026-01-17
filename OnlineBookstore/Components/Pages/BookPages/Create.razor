@@ -69,7 +69,7 @@
                             {
                                 @foreach (var author in Authors)
                                 {
-                                    @* FIXED CS1061: Changed author.FirstName to author.Name *@
+                                    @* Use @author.Name instead of FirstName/LastName *@
                                     <option value="@author.Id">@author.Name</option>
                                 }
                             }

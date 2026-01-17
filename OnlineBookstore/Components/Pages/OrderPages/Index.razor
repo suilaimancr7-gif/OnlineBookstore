@@ -2,74 +2,63 @@
 @using OnlineBookstore.Domain.Entities
 @using OnlineBookstore.Infrastructure.Contracts
 @using Microsoft.AspNetCore.Authorization
-@using System.Security.Claims
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IGenericRepository<Order> OrderRepo
-@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Order History</h3>
-        <a href="/checkout" class="btn btn-primary">New Order</a>
-    </div>
+<PageTitle>Orders</PageTitle>
 
-    <table class="table table-hover border shadow-sm">
-        <thead class="table-dark">
+<h1>Orders</h1>
+
+<table class="table table-hover align-middle shadow-sm rounded">
+    <thead class="table-dark">
+        <tr>
+            <th>Order ID</th>
+            <th>Customer ID</th> @* User ID requirement *@
+            <th>Order Date</th>
+            <th>Total Price</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in orders)
+        {
             <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Email</th>
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in orders)
-            {
-                <tr>
-                    <td>@order.Id</td>
-                    <td>@order.OrderDate.ToShortDateString()</td>
-                    <td>@order.CustomerEmail</td>
-                    <td class="text-center">
-                        @* All users can see details *@
-                        <a href="/orders/details/@order.Id" class="btn btn-info btn-sm">Details</a>
+                <td>@order.Id</td>
+                <td>@order.CustomerId</td>
+                <td>@order.OrderDate.ToShortDateString()</td>
+                <td>@order.TotalPrice.ToString("C")</td>
+                <td class="text-center">
+                    <div class="btn-group">
+                        <a href="@($"orders/details?id={order.Id}")" class="btn btn-outline-info btn-sm">Details</a>
 
-                        @* Only Admins can see Edit and Delete *@
-                        @if (isAdmin)
-                        {
-                            <a href="/orders/edit/@order.Id" class="btn btn-warning btn-sm mx-1">Edit</a>
-                            <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(order.Id)">Delete</button>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+                        <AuthorizeView Roles="Administrator">
+                            <Authorized>
+                                @* Admin can Edit and Delete orders *@
+                                <a href="@($"orders/edit?id={order.Id}")" class="btn btn-outline-warning btn-sm mx-1">Edit</a>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => DeleteOrder(order.Id)">Delete</button>
+                            </Authorized>
+                        </AuthorizeView>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
     private List<Order> orders = new();
-    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
-        // 1. Determine user role
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        isAdmin = user.IsInRole("Admin");
-
-        // 2. Fetch all orders from SQL Server
-        var response = await OrderRepo.GetAll();
-        orders = response.ToList();
+        var data = await OrderRepo.GetAll();
+        orders = data.ToList();
     }
 
-    private async Task HandleDelete(int id)
+    private async Task DeleteOrder(int id)
     {
-        // Double-check admin status before deleting
-        if (isAdmin)
-        {
-            await OrderRepo.Delete(id);
-            orders = (await OrderRepo.GetAll()).ToList();
-        }
+        await OrderRepo.Delete(id); // Admin Delete functionality
+        orders = (await OrderRepo.GetAll()).ToList();
     }
 }
