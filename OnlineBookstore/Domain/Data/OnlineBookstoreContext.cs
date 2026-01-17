@@ -20,6 +20,7 @@ namespace OnlineBookstore.Domain.Data
 
         // Add the Admin entity here for the new CRUD
         public DbSet<Admin> Admins { get; set; } = default!;
+        public DbSet<Wishlist> Wishlists { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

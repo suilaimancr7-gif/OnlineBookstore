@@ -1,0 +1,84 @@
+﻿@page "/wishlist"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@using OnlineBookstore.Infrastructure.Services
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IGenericRepository<Wishlist> WishlistRepo
+@inject CartService CartService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+
+<PageTitle>My Wishlist</PageTitle>
+
+<div class="container mt-4">
+    <h2><i class="bi bi-heart-fill text-danger"></i> My Wishlist</h2>
+    <hr />
+
+    @if (wishlistItems == null)
+    {
+        <div class="spinner-border text-primary" role="status"></div>
+    }
+    else if (!wishlistItems.Any())
+    {
+        <div class="alert alert-info">Your wishlist is empty. Browse books to add some!</div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var item in wishlistItems)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@item.Book?.ImageLink" class="card-img-top" style="height: 200px; object-fit: cover;" onerror="this.src='/favicon.png';">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@item.Book?.Title</h5>
+                            <p class="text-primary fw-bold">@item.Book?.PricePhysical.ToString("C")</p>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-sm" @onclick="() => MoveToCart(item)">
+                                    Move to Cart
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => RemoveFromWishlist(item.Id)">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Wishlist>? wishlistItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        // READ: Fetch items belonging to the logged-in user
+        var allItems = await WishlistRepo.GetAll();
+        wishlistItems = allItems.Where(w => w.CustomerId == userId).ToList();
+    }
+
+    private async Task MoveToCart(Wishlist item)
+    {
+        if (item.Book != null)
+        {
+            CartService.AddToCart(item.Book, "Physical");
+            await RemoveFromWishlist(item.Id);
+        }
+    }
+
+    private async Task RemoveFromWishlist(int id)
+    {
+        // DELETE: Remove item from database
+        await WishlistRepo.Delete(id);
+        wishlistItems = wishlistItems?.Where(i => i.Id != id).ToList();
+    }
+}

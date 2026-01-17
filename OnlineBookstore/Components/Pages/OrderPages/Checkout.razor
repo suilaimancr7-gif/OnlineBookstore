@@ -30,7 +30,6 @@
 
                         <h5 class="mb-3 text-primary">1. Customer Details</h5>
 
-                        @* Address is only required if Physical books are present *@
                         @if (CartService.CartEntries.Any(e => e.SelectedFormat == "Physical"))
                         {
                             <div class="mb-3">
@@ -121,7 +120,6 @@
     {
         errorMessage = "";
 
-        // 1. Get User ID to satisfy SQL CustomerId constraint
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -132,7 +130,6 @@
             return;
         }
 
-        // 2. Manual Validation
         if (cardNumber.Length != 16 || !cardNumber.All(char.IsDigit))
         {
             errorMessage = "A valid 16-digit card number is required.";
@@ -160,7 +157,6 @@
 
         try
         {
-            // 3. Generate Random 8-Digit Codes
             Random rnd = new Random();
             if (hasPhysical)
             {
@@ -171,7 +167,7 @@
                 generatedReference = rnd.Next(10000000, 99999999).ToString();
             }
 
-            // 4. Create Order Entity
+            // Capture the order details and the calculated tally
             var newOrder = new Order
             {
                 OrderDate = DateTime.Now,
@@ -179,7 +175,8 @@
                 ShippingAddress = hasPhysical ? shippingAddress : "Digital Delivery",
                 CustomerEmail = customerEmail,
                 TrackingNumber = generatedTracking,
-                ReferenceCode = generatedReference
+                ReferenceCode = generatedReference,
+                TotalAmount = CartService.GetTotal() // ENSURES THE SAVED TALLY MATCHES THE CART
             };
 
             foreach (var entry in CartService.CartEntries)
@@ -191,8 +188,7 @@
                 });
             }
 
-            // 5. Save to SQL Server
-            await OrderRepo.Insert(newOrder);
+            await OrderRepo.Insert(newOrder); // SAVES TO SQL SERVER
 
             CartService.ClearCart();
             isPaymentSuccessful = true;

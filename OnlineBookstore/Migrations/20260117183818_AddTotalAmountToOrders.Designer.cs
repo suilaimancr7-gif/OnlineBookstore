@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineBookstore.Domain.Data;
 
@@ -11,9 +12,11 @@ using OnlineBookstore.Domain.Data;
 namespace OnlineBookstore.Migrations
 {
     [DbContext(typeof(OnlineBookstoreContext))]
-    partial class OnlineBookstoreContextModelSnapshot : ModelSnapshot
+    [Migration("20260117183818_AddTotalAmountToOrders")]
+    partial class AddTotalAmountToOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -251,7 +254,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "3781ad74-f56b-4599-92ed-dea6a3f30526",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b5704617-18f4-4a76-83c0-c3ff21bf8266",
+                            ConcurrencyStamp = "f7400a33-5c17-4108-98eb-43e5a8dc1335",
                             Email = "admin@localhost.com",
                             EmailConfirmed = true,
                             FirstName = "System",
@@ -259,9 +262,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@LOCALHOST.COM",
                             NormalizedUserName = "ADMIN@LOCALHOST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEC9jQiLsadNPHDZEDP1SLSWkntw6kbjgmLeI757PsmP8mGBDkkNahJWagmAwBgUG3g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAED4oxMtE2rA3H/tvB1fgUIWKthXbY6pcVjnvvWHpZkmUBvXRcl4JXyHr7+Xla8TvXw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8d412534-4273-4ddc-904f-993d6b2eb1db",
+                            SecurityStamp = "46fca73b-3445-4b39-b49b-d89192769743",
                             TwoFactorEnabled = false,
                             UserName = "admin@localhost.com"
                         },
@@ -269,7 +272,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "09be57e2-ffda-433d-817b-7157b76703d0",
+                            ConcurrencyStamp = "e12de28c-789b-42bb-9cc7-c307cddef565",
                             Email = "sarah.tan@example.com",
                             EmailConfirmed = true,
                             FirstName = "Sarah",
@@ -277,9 +280,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "SARAH.TAN@EXAMPLE.COM",
                             NormalizedUserName = "SARAH.TAN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAED4Xy3dlSQcY0q9ov98qWe8/SnEPL+hcDiegGxfhQK7c1Y2y/ImjLOIze2AFg1V2xg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDGy4HhYezZBUaQ5APuH9jsLfvsmrMd2Kkg6rH0sjO5ycH1VP3BuU1/xeXNfHvcgug==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7e38ddff-3f14-4d7c-b1b8-48219d052673",
+                            SecurityStamp = "b45b3cf4-0595-4363-ae06-64e237d1d23b",
                             TwoFactorEnabled = false,
                             UserName = "sarah.tan@example.com"
                         },
@@ -287,7 +290,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "b2c3d4e5-f6a7-4b6c-9d0e-1f2a3b4c5d6e",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e5b1d1b7-ebab-4936-80b1-42f86ea90948",
+                            ConcurrencyStamp = "289ef562-3c73-482a-b086-a109e04e8196",
                             Email = "muhammad.ali@example.com",
                             EmailConfirmed = true,
                             FirstName = "Muhammad",
@@ -295,9 +298,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "MUHAMMAD.ALI@EXAMPLE.COM",
                             NormalizedUserName = "MUHAMMAD.ALI@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJ9BwGULQZCYvzvG3Br46uR0SsL2K0++iZEzWgNGMVznOmkf2Yz4dd6vZPPfG4FTRQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAED011zWupqwbznIQxHsNRqqnYDx7Lhvosnb8AwSO+pv3NqSNSmkuIFHySRbl0vwVWg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "e266b4e4-581a-43f4-a2f4-b511ccda24cb",
+                            SecurityStamp = "b44e5f2d-9021-476d-9733-f7f1b0450eaf",
                             TwoFactorEnabled = false,
                             UserName = "muhammad.ali@example.com"
                         },
@@ -305,7 +308,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "c3d4e5f6-a7b8-4c7d-0e1f-2a3b4c5d6e7f",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "282e3476-b2e2-473c-8472-15e612fe3842",
+                            ConcurrencyStamp = "ee5ab502-e7d5-48f8-bbdc-c59eb19061c1",
                             Email = "emily.wong@example.com",
                             EmailConfirmed = true,
                             FirstName = "Emily",
@@ -313,9 +316,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "EMILY.WONG@EXAMPLE.COM",
                             NormalizedUserName = "EMILY.WONG@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDgyuuSjVU+roY2pZCn099lJloAGBwYMAo1iZEnyG4NsJWyw5ZjHcHf8HnAI8xFs+A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEAPC1DotNZwkgBnJT/auIwDWZLevcU8dvnYboBxhKbWJVakBaTR9BM7tE6jJ2PlnXA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "18633d88-15e5-4d4b-b97d-99a86bcb78e7",
+                            SecurityStamp = "faa0c9df-89e9-4fe8-89ac-a071cb942d11",
                             TwoFactorEnabled = false,
                             UserName = "emily.wong@example.com"
                         },
@@ -323,7 +326,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "d4e5f6a7-b8c9-4d8e-1f2a-3b4c5d6e7f8a",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "72cb5d05-e162-4900-ad2a-a30ed80afdaf",
+                            ConcurrencyStamp = "b01b3a19-eb14-4013-b9d2-7d6546e1ab28",
                             Email = "david.smith@example.com",
                             EmailConfirmed = true,
                             FirstName = "David",
@@ -331,9 +334,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "DAVID.SMITH@EXAMPLE.COM",
                             NormalizedUserName = "DAVID.SMITH@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAECKGGO4L5s5t6XT2F6enuHn0HxGmTJajmCUM74QgPI8E5iW11aOzVJfrkDF8KbTb3A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEWYZXpBm3GD1qqGfxgfrh3T8rldcqpRwqWqBigWHukt5sRqYXoo9P0HW1A8xINgNQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "46cadd4e-7b7d-447b-9df3-a7c45a074492",
+                            SecurityStamp = "bec66e0e-7d9a-4472-92e2-b63e2cd77b22",
                             TwoFactorEnabled = false,
                             UserName = "david.smith@example.com"
                         },
@@ -341,7 +344,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "e5f6a7b8-c9d0-4e9f-2a3b-4c5d6e7f8a9b",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "35c4b4c5-32cd-4011-8950-938d98aa9fc7",
+                            ConcurrencyStamp = "6131b7f2-24de-44d8-a715-491a36a486a0",
                             Email = "priya.sharma@example.com",
                             EmailConfirmed = true,
                             FirstName = "Priya",
@@ -349,9 +352,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "PRIYA.SHARMA@EXAMPLE.COM",
                             NormalizedUserName = "PRIYA.SHARMA@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEgBTBBcy2r4j1X+H6s7kPrJp6r42Gb/kldgS6iY7wUSZU2+x3arqJKJQXsuDtVg4A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPh3E50kHVwmnhV9WHPGYBjBjBLs7z8w7SmDRjA1Vx47cQmMNwNFAqCa2Xn3vRI4Mw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "b7949a5a-bc50-48b5-835f-fe9cb20d8db3",
+                            SecurityStamp = "98f408f9-6153-40ea-9f8e-c5f45d95e7f3",
                             TwoFactorEnabled = false,
                             UserName = "priya.sharma@example.com"
                         },
@@ -359,7 +362,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "f6a7b8c9-d0e1-4fa0-3b4c-5d6e7f8a9b0c",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "aeb9708f-0843-4057-b9ee-42e5d1aa8c61",
+                            ConcurrencyStamp = "37082a05-d760-4228-85aa-564ecce85b02",
                             Email = "jason.lee@example.com",
                             EmailConfirmed = true,
                             FirstName = "Jason",
@@ -367,9 +370,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "JASON.LEE@EXAMPLE.COM",
                             NormalizedUserName = "JASON.LEE@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBU9hVNow9JmauDyl4zBX1MrS3a0cOWEBi/EwzCWdOho4sWN1IapkS6cnGenMgA1xg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMxfqIKjYtuZkxGeSzbkimqJ/bW6pjhGK7xAkDL20+DJRX+LPl0neaVpotNhNYXzYw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "46c0096c-9093-4a67-918c-dd37dd0ba62e",
+                            SecurityStamp = "2d8f9894-8891-4057-b8d0-34f1813c0c14",
                             TwoFactorEnabled = false,
                             UserName = "jason.lee@example.com"
                         },
@@ -377,7 +380,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "a7b8c9d0-e1f2-4fb1-4c5d-6e7f8a9b0c1d",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "8ee26d4c-1443-44d1-9162-0d4b90d9ba73",
+                            ConcurrencyStamp = "fd2b1eb7-8696-44db-bc24-e7ec020a16e9",
                             Email = "chloe.lim@example.com",
                             EmailConfirmed = true,
                             FirstName = "Chloe",
@@ -385,9 +388,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "CHLOE.LIM@EXAMPLE.COM",
                             NormalizedUserName = "CHLOE.LIM@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEF7Yv472Utf6B568E2t5aeQYPQKOGggpj9S5v0lIs2r8NtZEd8CKPqKP2kC7QGxVIQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEF2x8fbF+1Dxb6A9xRc2rUaTBR/w2gVq3QNG1Hh1MrKo6x7vDBnuGH53Oss7iBAIzg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "87e83e7d-688e-47ed-9c5b-d3b7556635d3",
+                            SecurityStamp = "cf7163e1-9e55-44df-926f-0cbdf0a9f094",
                             TwoFactorEnabled = false,
                             UserName = "chloe.lim@example.com"
                         },
@@ -395,7 +398,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "b8c9d0e1-f2a3-4fc2-5d6e-7f8a9b0c1d2e",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "8460b419-4076-4b18-add8-4f3dd54b939a",
+                            ConcurrencyStamp = "4ed6a47a-1fd1-40e9-89a8-f51470fad002",
                             Email = "ahmad.hassan@example.com",
                             EmailConfirmed = true,
                             FirstName = "Ahmad",
@@ -403,9 +406,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "AHMAD.HASSAN@EXAMPLE.COM",
                             NormalizedUserName = "AHMAD.HASSAN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMS0GpemZ6AX2n+AHTXixQC0IewYbH+KPe4X6z4cyjCy15YHeYb37vU/bmu4FK0WRw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENapz5KQQ9QRd5urDw8zP9dfCiSgKOD2TKq7EP86QetTpN4n6gbMPbvRMQmp5ZiViQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "db2ebe54-8eba-4bc3-a436-1b2fabb9dabe",
+                            SecurityStamp = "5b9cc355-a1a5-461f-a098-60f5b3a63875",
                             TwoFactorEnabled = false,
                             UserName = "ahmad.hassan@example.com"
                         },
@@ -413,7 +416,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "c9d0e1f2-a3b4-4fd3-6e7f-8a9b0c1d2e3f",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "03113c5d-9ff7-4559-aae8-3c4c98b87893",
+                            ConcurrencyStamp = "db1f28cc-e7a6-45a2-8bcc-9a3a029cc621",
                             Email = "linda.nguyen@example.com",
                             EmailConfirmed = true,
                             FirstName = "Linda",
@@ -421,9 +424,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "LINDA.NGUYEN@EXAMPLE.COM",
                             NormalizedUserName = "LINDA.NGUYEN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEALp9tyNyYY1vLb5B0iG/GscsbUQEjrY9+kFLilEBFTNfei1QSjettWFNhzj2V+2XQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJJtAIF43GPL11AF5czzSy0pAjr7X+y1jA1Bauo1VlmM/olCoLvQPGGx30eFQ73jrQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "6d057aea-9693-4007-ac5f-976fb98fa2dc",
+                            SecurityStamp = "8d4ed092-c239-48f3-9b58-7e0a68267f52",
                             TwoFactorEnabled = false,
                             UserName = "linda.nguyen@example.com"
                         },
@@ -431,7 +434,7 @@ namespace OnlineBookstore.Migrations
                         {
                             Id = "d0e1f2a3-b4c5-4fe4-7f8a-9b0c1d2e3f4a",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b2b91e2a-9f96-42c2-aceb-bd35c840e2f0",
+                            ConcurrencyStamp = "d29fbc3e-68ab-4cc6-873e-1cf197a0d672",
                             Email = "robert.brown@example.com",
                             EmailConfirmed = true,
                             FirstName = "Robert",
@@ -439,9 +442,9 @@ namespace OnlineBookstore.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ROBERT.BROWN@EXAMPLE.COM",
                             NormalizedUserName = "ROBERT.BROWN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEiJ9oxjl3scOH2cFt/5QNK/02OBxYnIS+RhsRaGa3FTR9kgovZmF/poSLGwBWqHfA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENUREs+m61hbN6t5Ds2w/M4VGf9kFf6dksqarw7te9lNxpf3iomn8WK2dhLTVSOdYQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "010afa0c-af50-4a98-aca8-3f5758766cd0",
+                            SecurityStamp = "9340db23-512a-4a69-add3-076deefbba29",
                             TwoFactorEnabled = false,
                             UserName = "robert.brown@example.com"
                         });
@@ -1376,43 +1379,6 @@ namespace OnlineBookstore.Migrations
                     b.ToTable("Publishers");
                 });
 
-            modelBuilder.Entity("OnlineBookstore.Domain.Entities.Wishlist", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookId");
-
-                    b.ToTable("Wishlists");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1518,17 +1484,6 @@ namespace OnlineBookstore.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("OnlineBookstore.Domain.Entities.Wishlist", b =>
-                {
-                    b.HasOne("OnlineBookstore.Domain.Entities.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("OnlineBookstore.Domain.Entities.Author", b =>
