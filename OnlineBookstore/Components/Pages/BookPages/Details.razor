@@ -22,7 +22,7 @@
             <div class="col-md-8">
                 <div class="d-flex justify-content-between align-items-start">
                     <h1>@book.Title</h1>
-                    @* WISHLIST CREATE: Adds book to user's saved list *@
+                    @* Heart icon for quick add *@
                     <button class="btn btn-outline-danger border-0" @onclick="AddToWishlist" title="Add to Wishlist">
                         <i class="bi bi-heart-fill fs-3"></i>
                     </button>
@@ -42,9 +42,16 @@
                     </div>
                 </div>
 
-                <button class="btn btn-success btn-lg w-100" disabled="@(string.IsNullOrEmpty(SelectedFormat))" @onclick="AddToCart">
-                    Add to Cart
-                </button>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success btn-lg" disabled="@(string.IsNullOrEmpty(SelectedFormat))" @onclick="AddToCart">
+                        <i class="bi bi-cart-plus"></i> Add to Cart
+                    </button>
+
+                    @* Explicit button under Add to Cart *@
+                    <button class="btn btn-outline-primary btn-lg" @onclick="AddToWishlist">
+                        <i class="bi bi-heart"></i> Add to Wishlist
+                    </button>
+                </div>
 
                 @if (!string.IsNullOrEmpty(wishlistMessage))
                 {
@@ -77,8 +84,7 @@
     private async Task AddToWishlist()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userId))
         {
@@ -94,7 +100,7 @@
             return;
         }
 
-        // CREATE: Logic to save the item to the database
+        // Create logic to save item to database
         var entry = new Wishlist
         {
             BookId = book!.Id,
@@ -103,6 +109,6 @@
         };
 
         await WishlistRepo.Insert(entry);
-        wishlistMessage = "Book added to your wishlist!";
+        wishlistMessage = $"{book.Title} has been added to your wishlist!";
     }
 }

@@ -16,7 +16,7 @@
 
     @if (WishlistItems == null)
     {
-        <p><em>Loading...</em></p>
+        <p><em>Loading your favorites...</em></p>
     }
     else if (!WishlistItems.Any())
     {
@@ -27,7 +27,7 @@
         <table class="table table-hover shadow-sm border">
             <thead class="table-dark">
                 <tr>
-                    <th>Book Title</th>
+                    <th>Book Title</th> @* Displaying the Title here *@
                     <th>Date Added</th>
                     <th class="text-center">Actions</th>
                 </tr>
@@ -36,12 +36,12 @@
                 @foreach (var item in WishlistItems)
                 {
                     <tr>
-                        <td class="fw-bold">@item.Book?.Title</td>
+                        <td class="fw-bold">@item.Book?.Title</td> @* Book title in the wishlist *@
                         <td>@item.DateAdded.ToShortDateString()</td>
                         <td class="text-center">
                             <div class="btn-group">
                                 <a href="@($"/wishlist/details?id={item.Id}")" class="btn btn-outline-info btn-sm">Details</a>
-                                <a href="@($"/wishlist/edit?id={item.Id}")" class="btn btn-outline-warning btn-sm mx-1">Edit</a>
+                                @* Edit button has been removed from here *@
                                 <button class="btn btn-outline-danger btn-sm" @onclick="() => HandleDelete(item.Id)">Remove</button>
                             </div>
                         </td>
@@ -61,8 +61,13 @@
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var data = await WishlistRepo.GetAll();
-        WishlistItems = data.Where(w => w.CustomerId == userId).ToList();
+
+        // Using Include to ensure the Book title is loaded from the database
+        var data = await WishlistRepo.GetAll(
+            expression: w => w.CustomerId == userId,
+            includes: q => q.Include(w => w.Book)
+        );
+        WishlistItems = data.ToList();
     }
 
     private async Task HandleDelete(int id)
