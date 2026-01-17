@@ -1,0 +1,52 @@
+﻿@page "/admins"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject IGenericRepository<Admin> AdminRepo
+
+<div class="container mt-4">
+    <h3>Admin Management</h3>
+    <a href="/admins/create" class="btn btn-primary mb-3">Add New Admin</a>
+
+    <table class="table table-striped border">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var admin in admins)
+            {
+                <tr>
+                    <td>@admin.AdminName</td>
+                    <td>@admin.AdminEmail</td>
+                    <td>@admin.AdminRole</td>
+                    <td>
+                        <a href="/admins/edit/@admin.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteAdmin(admin.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Admin> admins = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        admins = (await AdminRepo.GetAll()).ToList();
+    }
+
+    private async Task DeleteAdmin(int id)
+    {
+        await AdminRepo.Delete(id);
+        admins = (await AdminRepo.GetAll()).ToList();
+    }
+}

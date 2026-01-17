@@ -1,0 +1,80 @@
+﻿@page "/admins/create"
+@page "/admins/edit/{id:int}"
+@using OnlineBookstore.Domain.Entities
+@using OnlineBookstore.Infrastructure.Contracts
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject IGenericRepository<Admin> AdminRepo
+@inject NavigationManager NavManager
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0">@(id == 0 ? "Create New Admin" : "Edit Admin Details")</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Admin Name</label>
+                    <input type="text" @bind="admin.AdminName" class="form-control" placeholder="Enter full name" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Email Address</label>
+                    <input type="email" @bind="admin.AdminEmail" class="form-control" placeholder="admin@bookstore.com" />
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label fw-bold">Role Assignment</label>
+                    <select @bind="admin.AdminRole" class="form-select">
+                        <option value="">-- Select Role --</option>
+                        <option value="SuperAdmin">SuperAdmin</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Staff">Staff</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button class="btn btn-success px-4 fw-bold" @onclick="HandleSave">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a href="/admins" class="btn btn-secondary px-4">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+    private Admin admin = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // If id is not 0, we are in Edit mode; fetch data from SQL
+        if (id != 0)
+        {
+            var foundAdmin = await AdminRepo.Get(q => q.Id == id);
+            if (foundAdmin != null)
+            {
+                admin = foundAdmin;
+            }
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        if (id == 0)
+        {
+            // Insert new record into Admins table
+            await AdminRepo.Insert(admin);
+        }
+        else
+        {
+            // Update existing record in SQL Server
+            await AdminRepo.Update(admin);
+        }
+
+        // Return to the list view
+        NavManager.NavigateTo("/admins");
+    }
+}

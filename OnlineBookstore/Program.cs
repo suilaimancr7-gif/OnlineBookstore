@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using OnlineBookstore.Domain.Data;
 using OnlineBookstore.Domain;
+using OnlineBookstore.Domain.Entities; // Added for Admin entity
 using OnlineBookstore.Infrastructure.Contracts;
 using OnlineBookstore.Infrastructure.Repositories;
-using OnlineBookstore.Infrastructure.Services; // Ensure this matches your service namespace
+using OnlineBookstore.Infrastructure.Services;
 using OnlineBookstore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,8 +36,12 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddSingleton(TimeProvider.System);
 
 // --- Custom Service Registrations ---
+// This handles the general repository pattern
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-// This line fixes the 'InvalidOperationException'
+
+// Specific registration for the Admin CRUD entity
+builder.Services.AddScoped<IGenericRepository<Admin>, GenericRepository<Admin>>();
+
 builder.Services.AddScoped<CartService>();
 
 builder.Services.AddRazorPages();

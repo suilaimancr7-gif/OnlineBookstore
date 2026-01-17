@@ -6,7 +6,6 @@ using OnlineBookstore.Configurations;
 
 namespace OnlineBookstore.Domain.Data
 {
-    // Updated to Primary Constructor syntax from CarRental skeleton
     public class OnlineBookstoreContext(DbContextOptions<OnlineBookstoreContext> options) :
         IdentityDbContext<OnlineBookstoreUser>(options)
     {
@@ -19,12 +18,13 @@ namespace OnlineBookstore.Domain.Data
         public DbSet<OrderItem> OrderItems { get; set; } = default!;
         public DbSet<Payment> Payments { get; set; } = default!;
 
+        // Add the Admin entity here for the new CRUD
+        public DbSet<Admin> Admins { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            // Mandatory for IdentityDbContext to function
             base.OnModelCreating(builder);
 
-            // Placeholder for future seed data configurations
             builder.ApplyConfiguration(new RoleSeed());
             builder.ApplyConfiguration(new UserSeed());
             builder.ApplyConfiguration(new GenreSeed());

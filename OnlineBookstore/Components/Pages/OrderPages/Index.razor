@@ -2,20 +2,24 @@
 @using OnlineBookstore.Domain.Entities
 @using OnlineBookstore.Infrastructure.Contracts
 @using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IGenericRepository<Order> OrderRepo
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>Order History</h3>
+        <a href="/checkout" class="btn btn-primary">New Order</a>
     </div>
 
     <table class="table table-hover border shadow-sm">
         <thead class="table-dark">
             <tr>
-                <th>ID</th>
+                <th>Order ID</th>
                 <th>Date</th>
+                <th>Email</th>
                 <th class="text-center">Actions</th>
             </tr>
         </thead>
@@ -25,10 +29,17 @@
                 <tr>
                     <td>@order.Id</td>
                     <td>@order.OrderDate.ToShortDateString()</td>
+                    <td>@order.CustomerEmail</td>
                     <td class="text-center">
+                        @* All users can see details *@
                         <a href="/orders/details/@order.Id" class="btn btn-info btn-sm">Details</a>
-                        <a href="/orders/edit/@order.Id" class="btn btn-warning btn-sm">Edit</a>
-                        <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(order.Id)">Delete</button>
+
+                        @* Only Admins can see Edit and Delete *@
+                        @if (isAdmin)
+                        {
+                            <a href="/orders/edit/@order.Id" class="btn btn-warning btn-sm mx-1">Edit</a>
+                            <button class="btn btn-danger btn-sm" @onclick="() => HandleDelete(order.Id)">Delete</button>
+                        }
                     </td>
                 </tr>
             }
@@ -38,18 +49,24 @@
 
 @code {
     private List<Order> orders = new();
+    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // 1. Determine user role
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.IsInRole("Admin");
+
+        // 2. Fetch all orders from SQL Server
         var response = await OrderRepo.GetAll();
         orders = response.ToList();
     }
 
     private async Task HandleDelete(int id)
     {
-        // Fixed: Passing 'id' (int) to match repository requirement
-        var orderToDelete = await OrderRepo.Get(q => q.Id == id);
-        if (orderToDelete != null)
+        // Double-check admin status before deleting
+        if (isAdmin)
         {
             await OrderRepo.Delete(id);
             orders = (await OrderRepo.GetAll()).ToList();
